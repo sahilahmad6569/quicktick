@@ -41,10 +41,7 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.white,
-                  Colors.grey.shade50,
-                ],
+                colors: [Colors.white, Colors.grey.shade50],
               ),
             ),
             child: Column(
@@ -77,9 +74,9 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Task name input with enhanced styling
                 TextField(
                   controller: taskController,
@@ -95,7 +92,10 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                      borderSide: BorderSide(
+                        color: AppTheme.primaryColor,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
                     fillColor: Colors.grey.shade50,
@@ -106,9 +106,9 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                   ),
                   autofocus: true,
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Priority selection with enhanced design
                 const Text(
                   'Priority Level',
@@ -119,7 +119,7 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 Row(
                   children: [
                     Expanded(
@@ -128,7 +128,8 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                         text: 'Urgent',
                         color: AppTheme.urgentColor,
                         isSelected: selectedLabel == TaskLabel.urgent,
-                        onTap: () => setState(() => selectedLabel = TaskLabel.urgent),
+                        onTap: () =>
+                            setState(() => selectedLabel = TaskLabel.urgent),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -138,75 +139,84 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                         text: 'Important',
                         color: AppTheme.importantColor,
                         isSelected: selectedLabel == TaskLabel.important,
-                        onTap: () => setState(() => selectedLabel = TaskLabel.important),
+                        onTap: () =>
+                            setState(() => selectedLabel = TaskLabel.important),
                       ),
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
-                
-                // Enhanced action buttons with delete option
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                // Responsive action buttons
+                Column(
                   children: [
-                    // Delete button on the left
-                    TextButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showDeleteConfirmation(context);
-                      },
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text(
-                        'Delete Task',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.red.shade600,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    // Delete button (full width)
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _showDeleteConfirmation(context);
+                        },
+                        icon: const Icon(Icons.delete_outline, size: 18),
+                        label: const Text(
+                          'Delete Task',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red.shade600,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
                       ),
                     ),
-                    
-                    // Save and Cancel buttons on the right
+
+                    const SizedBox(height: 8),
+
+                    // Cancel and Save buttons row
                     Row(
                       children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.grey.shade600,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          ),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(fontWeight: FontWeight.w500),
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.grey.shade600,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            if (taskController.text.trim().isNotEmpty) {
-                              context.read<TaskProvider>().updateTask(
-                                widget.task.id,
-                                taskController.text.trim(),
-                                selectedLabel,
-                              );
-                              Navigator.of(context).pop();
-                              _showSuccessSnackBar(context);
-                            } else {
-                              _showErrorSnackBar(context);
-                            }
-                          },
-                          icon: const Icon(Icons.save, size: 18),
-                          label: const Text(
-                            'Save Changes',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              if (taskController.text.trim().isNotEmpty) {
+                                context.read<TaskProvider>().updateTask(
+                                  widget.task.id,
+                                  taskController.text.trim(),
+                                  selectedLabel,
+                                );
+                                Navigator.of(context).pop();
+                                _showSuccessSnackBar(context);
+                              } else {
+                                _showErrorSnackBar(context);
+                              }
+                            },
+                            icon: const Icon(Icons.save, size: 18),
+                            label: const Text(
+                              'Save',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           ),
                         ),
@@ -237,17 +247,16 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
         decoration: BoxDecoration(
           color: isSelected ? color : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: color,
-            width: 2,
-          ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ] : null,
+          border: Border.all(color: color, width: 2),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           text,
@@ -351,10 +360,7 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [
-                Colors.white,
-                widget.task.labelColor.withOpacity(0.02),
-              ],
+              colors: [Colors.white, widget.task.labelColor.withOpacity(0.02)],
             ),
           ),
           child: Padding(
@@ -382,9 +388,9 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Task content - more compact
                 Expanded(
                   child: Column(
@@ -403,9 +409,9 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      
+
                       const SizedBox(height: 6),
-                      
+
                       // Compact priority and timestamp row
                       Row(
                         children: [
@@ -432,9 +438,9 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                               ),
                             ),
                           ),
-                          
+
                           const Spacer(),
-                          
+
                           // Compact timestamp
                           Text(
                             _formatTime(widget.task.createdAt),
@@ -449,9 +455,9 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 8),
-                
+
                 // Compact edit button
                 Material(
                   color: Colors.transparent,
