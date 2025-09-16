@@ -125,4 +125,19 @@ class TaskProvider extends ChangeNotifier {
   _tasks[taskIndex] = updatedTask;
   notifyListeners();
 }
+
+void uncompleteTask(String taskId) {
+  final taskIndex = _completedTasks.indexWhere((task) => task.id == taskId);
+  if (taskIndex == -1) return;
+
+  final task = _completedTasks[taskIndex];
+  final activeTask = task.copyWith(
+    isCompleted: false,
+    completedAt: null,
+  );
+
+  _completedTasks.removeAt(taskIndex);
+  _tasks.add(activeTask);
+  notifyListeners();
+}
 }

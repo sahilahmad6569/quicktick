@@ -20,34 +20,7 @@ class TaskCardWidget extends StatefulWidget {
   _TaskCardWidgetState createState() => _TaskCardWidgetState();
 }
 
-class _TaskCardWidgetState extends State<TaskCardWidget> 
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-  bool _isHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 150),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.98,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
+class _TaskCardWidgetState extends State<TaskCardWidget> {
   void _showEditDialog(BuildContext context) {
     final taskController = TextEditingController(text: widget.task.name);
     TaskLabel selectedLabel = widget.task.label;
@@ -154,7 +127,6 @@ class _TaskCardWidgetState extends State<TaskCardWidget>
                         label: TaskLabel.urgent,
                         text: 'Urgent',
                         color: AppTheme.urgentColor,
-                        icon: Icons.priority_high,
                         isSelected: selectedLabel == TaskLabel.urgent,
                         onTap: () => setState(() => selectedLabel = TaskLabel.urgent),
                       ),
@@ -165,7 +137,6 @@ class _TaskCardWidgetState extends State<TaskCardWidget>
                         label: TaskLabel.important,
                         text: 'Important',
                         color: AppTheme.importantColor,
-                        icon: Icons.flag,
                         isSelected: selectedLabel == TaskLabel.important,
                         onTap: () => setState(() => selectedLabel = TaskLabel.important),
                       ),
@@ -175,49 +146,71 @@ class _TaskCardWidgetState extends State<TaskCardWidget>
                 
                 const SizedBox(height: 24),
                 
-                // Enhanced action buttons
+                // Enhanced action buttons with delete option
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.grey.shade600,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      ),
-                      child: const Text(
-                        'Cancel',
+                    // Delete button on the left
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _showDeleteConfirmation(context);
+                      },
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text(
+                        'Delete Task',
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red.shade600,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        if (taskController.text.trim().isNotEmpty) {
-                          context.read<TaskProvider>().updateTask(
-                            widget.task.id,
-                            taskController.text.trim(),
-                            selectedLabel,
-                          );
-                          Navigator.of(context).pop();
-                          _showSuccessSnackBar(context);
-                        } else {
-                          _showErrorSnackBar(context);
-                        }
-                      },
-                      icon: const Icon(Icons.save, size: 18),
-                      label: const Text(
-                        'Save Changes',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    
+                    // Save and Cancel buttons on the right
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey.shade600,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            if (taskController.text.trim().isNotEmpty) {
+                              context.read<TaskProvider>().updateTask(
+                                widget.task.id,
+                                taskController.text.trim(),
+                                selectedLabel,
+                              );
+                              Navigator.of(context).pop();
+                              _showSuccessSnackBar(context);
+                            } else {
+                              _showErrorSnackBar(context);
+                            }
+                          },
+                          icon: const Icon(Icons.save, size: 18),
+                          label: const Text(
+                            'Save Changes',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -233,7 +226,6 @@ class _TaskCardWidgetState extends State<TaskCardWidget>
     required TaskLabel label,
     required String text,
     required Color color,
-    required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
@@ -257,24 +249,14 @@ class _TaskCardWidgetState extends State<TaskCardWidget>
             ),
           ] : null,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : color,
-              size: 16,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              text,
-              style: TextStyle(
-                color: isSelected ? Colors.white : color,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ],
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: isSelected ? Colors.white : color,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
         ),
       ),
     );
@@ -351,263 +333,150 @@ class _TaskCardWidgetState extends State<TaskCardWidget>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _animationController.forward(),
-      onTapUp: (_) => _animationController.reverse(),
-      onTapCancel: () => _animationController.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      child: Card(
+        elevation: 2,
+        shadowColor: widget.task.labelColor.withOpacity(0.15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: widget.task.labelColor.withOpacity(0.15),
+            width: 0.5,
+          ),
+        ),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: Card(
-            elevation: _isHovered ? 8 : 2,
-            shadowColor: widget.task.labelColor.withOpacity(0.2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: widget.task.labelColor.withOpacity(0.2),
-                width: 1,
-              ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Colors.white,
+                widget.task.labelColor.withOpacity(0.02),
+              ],
             ),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white,
-                    widget.task.labelColor.withOpacity(0.02),
-                  ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // Compact custom checkbox
+                GestureDetector(
+                  onTap: widget.onComplete,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: widget.task.labelColor,
+                        width: 2,
+                      ),
+                      color: Colors.transparent,
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      size: 12,
+                      color: widget.task.labelColor.withOpacity(0.3),
+                    ),
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top row with checkbox and actions
-                    Row(
-                      children: [
-                        // Custom animated checkbox
-                        GestureDetector(
-                          onTap: widget.onComplete,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 24,
-                            height: 24,
+                
+                const SizedBox(width: 12),
+                
+                // Task content - more compact
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Task name - single line
+                      Text(
+                        widget.task.name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      
+                      const SizedBox(height: 6),
+                      
+                      // Compact priority and timestamp row
+                      Row(
+                        children: [
+                          // Compact priority badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                              color: widget.task.labelColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
+                                color: widget.task.labelColor.withOpacity(0.25),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Text(
+                              widget.task.labelText,
+                              style: TextStyle(
                                 color: widget.task.labelColor,
-                                width: 2,
-                              ),
-                              color: Colors.transparent,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              size: 16,
-                              color: widget.task.labelColor.withOpacity(0.3),
-                            ),
-                          ),
-                        ),
-                        
-                        const SizedBox(width: 16),
-                        
-                        // Task content
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Task name with better typography
-                              Text(
-                                widget.task.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.textPrimary,
-                                  height: 1.3,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              
-                              const SizedBox(height: 8),
-                              
-                              // Priority badge and timestamp row
-                              Row(
-                                children: [
-                                  // Enhanced priority badge
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: widget.task.labelColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: widget.task.labelColor.withOpacity(0.3),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          widget.task.label == TaskLabel.urgent
-                                              ? Icons.priority_high
-                                              : Icons.flag,
-                                          size: 14,
-                                          color: widget.task.labelColor,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          widget.task.labelText,
-                                          style: TextStyle(
-                                            color: widget.task.labelColor,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  
-                                  const Spacer(),
-                                  
-                                  // Enhanced timestamp
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.access_time,
-                                          size: 12,
-                                          color: Colors.grey.shade600,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          _formatTime(widget.task.createdAt),
-                                          style: TextStyle(
-                                            color: Colors.grey.shade600,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Action buttons with enhanced styling
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        // Edit button
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _showEditDialog(context),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.blue.withOpacity(0.2),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.edit,
-                                    size: 16,
-                                    color: Colors.blue.shade600,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Edit',
-                                    style: TextStyle(
-                                      color: Colors.blue.shade600,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                        ),
-                        
-                        const SizedBox(width: 8),
-                        
-                        // Delete button
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _showDeleteConfirmation(context),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.red.withOpacity(0.2),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.delete,
-                                    size: 16,
-                                    color: Colors.red.shade600,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Delete',
-                                    style: TextStyle(
-                                      color: Colors.red.shade600,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          
+                          const Spacer(),
+                          
+                          // Compact timestamp
+                          Text(
+                            _formatTime(widget.task.createdAt),
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                
+                const SizedBox(width: 8),
+                
+                // Compact edit button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showEditDialog(context),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Colors.blue.withOpacity(0.15),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.edit,
+                        size: 14,
+                        color: Colors.blue.shade600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
